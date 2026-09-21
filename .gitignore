@@ -1,0 +1,14 @@
+# VS Code C++ IntelliSense 缓存（每个可达 1GB+，禁止提交）
+**/.vscode/browse.vc.db*
+
+# 构建/安装产物（ROS2 colcon）
+**/build/
+**/install/
+**/log/
+
+# 构建产物（ROS1 catkin）
+**/devel/
+.catkin_tools/
+
+# 编译产物
+*.o
