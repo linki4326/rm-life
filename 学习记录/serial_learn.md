@@ -1,5 +1,5 @@
 说实话 最开始去网上找串口通讯的代码的时候一直没找到这个库 直到问了ai才指导这是第三方写的库 这波马了 应该一开始先去看看这个库的头文件 这个库的作者在头文件里就署名了 然后我就去看了下TJ代码中对这个库的使用 
-```
+```cpp
 Gimbal::Gimbal(const std::string & config_path)
 {
   auto yaml = tools::load(config_path);
@@ -21,7 +21,7 @@ Gimbal::Gimbal(const std::string & config_path)
 ```
 
 对这个库最直接的引用一个是封装在io的云台代码里面 还有一个是就是封装在达妙imu文件里 都是直接封装在构造函数当中 然后在实际的task中 自瞄只需要实例化一个类 即可实现指定端口并打开端口 
-```
+```cpp
 #include <iostream>
 #include <serial/serial.h>
 
@@ -49,7 +49,7 @@ int main()
 ```
 通过博客搜索 这是最基础的串口接收数据的代码
 
-```
+```cpp
 #include "serial/serial.h"
 #include <iostream>
 #include <chrono>
