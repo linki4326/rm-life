@@ -47,7 +47,7 @@ void Solver::set_R_gimbal2world(const Eigen::Quaterniond & q)
   armor.xyz_in_gimbal = R_camera2gimbal_ * xyz_in_camera + t_camera2gimbal_;
   armor.xyz_in_world = R_gimbal2world_ * armor.xyz_in_gimbal;
   ```
-  我们在拿到云台到世界的旋转矩阵(R_gimbal2world_)之后就可以拿这个矩阵进行运算 最终得到装甲版在世界坐标系下的坐标
+  我们在拿到云台到世界的旋转矩阵(R_gimbal2world_)之后就可以拿这个矩阵进行运算 最终得到装甲版在世界坐标系下的坐标 然后在standard.cpp文件里面我们就看不到任何关于姿态的值传入了 原因是在类的实例化的时候 将Solver这个类的一个实例化对象solver以引用的方式传入了tracker的构造函数 也就是说此时tracker持有solver的一切数据 
 
 # 补档
 例会上听到了四元数插值 回头看了下 算是个有趣的发现 就是
