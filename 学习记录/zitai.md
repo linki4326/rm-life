@@ -40,13 +40,14 @@ void Solver::set_R_gimbal2world(const Eigen::Quaterniond & q)
 {
   Eigen::Matrix3d R_imubody2imuabs = q.toRotationMatrix();
   R_gimbal2world_ = R_gimbal2imubody_.transpose() * R_imubody2imuabs * R_gimbal2imubody_;
-}```
+}
+```
 这是这个函数的具体定义 这里先将云台imu四元数转成云台imu旋转矩阵 然后再进行一个基变换得到云台到世界的旋转矩阵 但是这里命名感觉有点诡异 我看的有点恍惚 感觉应该把imuabs换成world会好读一点 在看这里的时候我还有一个疑问就是 为什么云台的imu被转换成旋转矩阵之后就可以直接用作基变换 后来问他们才知道他们本质都是描述坐标系b关于坐标系a的变换 
 ```cpp
  cv::cv2eigen(tvec, xyz_in_camera);
   armor.xyz_in_gimbal = R_camera2gimbal_ * xyz_in_camera + t_camera2gimbal_;
   armor.xyz_in_world = R_gimbal2world_ * armor.xyz_in_gimbal;
-  ```
+```
   我们在拿到云台到世界的旋转矩阵(R_gimbal2world_)之后就可以拿这个矩阵进行运算 最终得到装甲版在世界坐标系下的坐标 然后在standard.cpp文件里面我们就看不到任何关于姿态的值传入了 原因是在类的实例化的时候 将Solver这个类的一个实例化对象solver以引用的方式传入了tracker的构造函数 也就是说此时tracker持有solver的一切数据 
 
 # 补档
