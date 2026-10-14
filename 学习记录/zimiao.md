@@ -562,3 +562,73 @@ bool Detector::detect(Armor & armor, const cv::Mat & bgr_img)
 ```
 这里使用的是detect的第二个函数重载 具体的实现我还没仔细看 回头可以补档
 到这里整个链条差不多就可以连在一块了 最终它会返回一个armor的std列表 然后就可以到下一行代码了
+## auto targets = tracker.track(armors, t);
+```cpp
+std::list<Target> Tracker::track(
+  std::list<Armor> & armors, std::chrono::steady_clock::time_point t, bool use_enemy_color)
+{
+  auto dt = tools::delta_time(t, last_timestamp_);
+  last_timestamp_ = t;
+
+  // 时间间隔过长，说明可能发生了相机离线
+  if (state_ != "lost" && dt > 0.1) {
+    tools::logger()->warn("[Tracker] Large dt: {:.3f}s", dt);
+    state_ = "lost";
+  }
+  // 过滤掉非我方装甲板
+  armors.remove_if([&](const auto_aim::Armor & a) { return a.color != enemy_color_; });
+
+  // 过滤前哨站顶部装甲板
+  // armors.remove_if([this](const auto_aim::Armor & a) {
+  //   return a.name == ArmorName::outpost &&
+  //          solver_.oupost_reprojection_error(a, 27.5 * CV_PI / 180.0) <
+  //            solver_.oupost_reprojection_error(a, -15 * CV_PI / 180.0);
+  // });
+
+  // 优先选择靠近图像中心的装甲板
+  armors.sort([](const Armor & a, const Armor & b) {
+    cv::Point2f img_center(1440 / 2, 1080 / 2);  // TODO
+    auto distance_1 = cv::norm(a.center - img_center);
+    auto distance_2 = cv::norm(b.center - img_center);
+    return distance_1 < distance_2;
+  });
+
+  // 按优先级排序，优先级最高在首位(优先级越高数字越小，1的优先级最高)
+  armors.sort(
+    [](const auto_aim::Armor & a, const auto_aim::Armor & b) { return a.priority < b.priority; });
+
+  bool found;
+  if (state_ == "lost") {
+    found = set_target(armors, t);//调用封装好的函数 创建target对象(函数内实现) 
+  }
+
+  else {
+    found = update_target(armors, t);
+  }
+
+  state_machine(found);
+
+  // 发散检测
+  if (state_ != "lost" && target_.diverged()) {
+    tools::logger()->debug("[Tracker] Target diverged!");
+    state_ = "lost";
+    return {};
+  }
+
+  // 收敛效果检测：
+  if (
+    std::accumulate(
+      target_.ekf().recent_nis_failures.begin(), target_.ekf().recent_nis_failures.end(), 0) >=
+    (0.4 * target_.ekf().window_size)) {
+    tools::logger()->debug("[Target] Bad Converge Found!");
+    state_ = "lost";
+    return {};
+  }
+
+  if (state_ == "lost") return {};
+
+  std::list<Target> targets = {target_};
+  return targets;
+}
+```
+依旧是目前的能力还不足以能够解释ekf这边的问题 
