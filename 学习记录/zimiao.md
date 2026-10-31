@@ -632,3 +632,5 @@ std::list<Target> Tracker::track(
 }
 ```
 依旧是目前的能力还不足以能够解释ekf这边的问题 
+## auto command = aimer.aim(targets, t, cboard.bullet_speed);
+这是这个自瞄的最后一步
